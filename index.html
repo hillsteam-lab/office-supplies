@@ -1,385 +1,580 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Office Supplies" />
+<meta name="theme-color" content="#f7f6f2" />
+<title>Office Supplies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  .tracker { padding: 1.5rem 0; font-family: var(--font-sans); }
-  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 12px; }
-  .header-left h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
-  .header-left p { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
-  .simulate-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; }
-  .sim-btn { font-size: 12px; border: 0.5px solid var(--color-border-secondary); background: none; padding: 5px 10px; border-radius: var(--border-radius-md); cursor: pointer; color: var(--color-text-secondary); }
-  .sim-btn:hover { background: var(--color-background-secondary); }
-  .sim-label { font-size: 12px; color: var(--color-text-secondary); }
-  .alert-banner { background: #FAEEDA; border: 0.5px solid #FAC775; border-radius: var(--border-radius-md); padding: 10px 14px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
-  .alert-banner.hidden { display: none; }
-  .alert-icon { width: 18px; height: 18px; background: #EF9F27; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; font-weight: 500; color: white; }
-  .alert-text { font-size: 13px; color: #633806; flex: 1; }
-  .alert-text strong { font-weight: 500; }
-  .dismiss-btn { font-size: 14px; color: var(--color-text-secondary); cursor: pointer; border: none; background: none; padding: 2px 6px; border-radius: 4px; line-height: 1; }
-  .dismiss-btn:hover { background: var(--color-background-secondary); }
-  .reminder-banner { background: #E6F1FB; border: 0.5px solid #B5D4F4; border-radius: var(--border-radius-md); padding: 10px 14px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
-  .reminder-banner.hidden { display: none; }
-  .reminder-text { font-size: 13px; color: #042C53; flex: 1; }
-  .reminder-text strong { font-weight: 500; }
-  .store-section { margin-bottom: 1.75rem; }
-  .store-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
-  .store-header-left { display: flex; align-items: center; gap: 10px; }
-  .store-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .store-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
-  .store-count { font-size: 12px; color: var(--color-text-secondary); }
-  .store-alert-badge { font-size: 11px; font-weight: 500; background: #FAEEDA; color: #633806; padding: 2px 8px; border-radius: 99px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-  .item-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; transition: border-color 0.2s; }
-  .item-card.low { border-color: #FAC775; }
-  .item-card.critical { border-color: #F7C1C1; }
-  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
-  .card-info { flex: 1; min-width: 0; }
-  .item-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
-  .card-top-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .status-pill { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 99px; }
-  .status-ok { background: #EAF3DE; color: #27500A; }
-  .status-low { background: #FAEEDA; color: #633806; }
-  .status-critical { background: #FCEBEB; color: #501313; }
-  .icon-btn { width: 24px; height: 24px; border-radius: 5px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-text-secondary); font-size: 13px; transition: background 0.15s; }
-  .icon-btn:hover { background: var(--color-background-secondary); }
-  .icon-btn.delete:hover { background: #FCEBEB; color: #A32D2D; }
-  .bar-wrap { height: 6px; background: var(--color-background-secondary); border-radius: 99px; margin-bottom: 10px; overflow: hidden; }
-  .bar { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
-  .bar-ok { background: #639922; }
-  .bar-low { background: #EF9F27; }
-  .bar-critical { background: #E24B4A; }
-  .card-bottom { display: flex; align-items: center; justify-content: space-between; }
-  .count-display { font-size: 13px; color: var(--color-text-secondary); }
-  .count-display span { font-weight: 500; color: var(--color-text-primary); }
-  .controls { display: flex; align-items: center; gap: 6px; }
-  .ctrl-btn { width: 26px; height: 26px; border-radius: 6px; border: 0.5px solid var(--color-border-secondary); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--color-text-primary); transition: background 0.15s; }
-  .ctrl-btn:hover { background: var(--color-background-secondary); }
-  .ctrl-btn:active { transform: scale(0.95); }
-  .notes-area { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--color-border-tertiary); }
-  .notes-display { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; cursor: pointer; min-height: 18px; word-break: break-word; }
-  .notes-display a { color: var(--color-text-info); text-decoration: none; }
-  .notes-display a:hover { text-decoration: underline; }
-  .notes-display.empty { color: var(--color-text-tertiary); font-style: italic; }
-  .notes-display.empty:hover { color: var(--color-text-secondary); }
-  .notes-input { width: 100%; font-size: 12px; resize: none; border: 0.5px solid var(--color-border-secondary); border-radius: 6px; padding: 6px 8px; font-family: var(--font-sans); color: var(--color-text-primary); background: var(--color-background-secondary); line-height: 1.5; }
-  .notes-input:focus { outline: none; border-color: var(--color-border-primary); }
-  .notes-actions { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-end; }
-  .notes-save { font-size: 12px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; padding: 4px 10px; border-radius: 5px; cursor: pointer; }
-  .notes-cancel { font-size: 12px; background: none; border: 0.5px solid var(--color-border-secondary); padding: 4px 10px; border-radius: 5px; cursor: pointer; color: var(--color-text-secondary); }
-  .section-footer { margin-top: 0.5rem; padding-top: 1rem; border-top: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  .add-item-btn { font-size: 13px; color: var(--color-text-info); background: none; border: 0.5px solid var(--color-border-info); padding: 6px 14px; border-radius: var(--border-radius-md); cursor: pointer; }
-  .add-item-btn:hover { background: var(--color-background-info); }
-  .summary { font-size: 13px; color: var(--color-text-secondary); }
-  .summary strong { color: var(--color-text-primary); font-weight: 500; }
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 100; }
-  .modal-overlay.hidden { display: none; }
-  .modal { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; width: 340px; max-width: 92vw; max-height: 90vh; overflow-y: auto; }
-  .modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; color: var(--color-text-primary); }
-  .field { margin-bottom: 12px; }
-  .field label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
-  .field input, .field select { width: 100%; font-size: 14px; }
-  .field textarea { width: 100%; font-size: 13px; font-family: var(--font-sans); resize: vertical; border: 0.5px solid var(--color-border-secondary); border-radius: 6px; padding: 6px 8px; background: var(--color-background-secondary); color: var(--color-text-primary); line-height: 1.5; }
-  .field textarea:focus { outline: none; border-color: var(--color-border-primary); }
-  .store-select-wrap { position: relative; }
-  .add-store-row { display: flex; gap: 6px; margin-top: 6px; }
-  .add-store-row input { flex: 1; font-size: 13px; }
-  .add-store-btn { font-size: 12px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; padding: 0 12px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
-  .modal-actions { display: flex; gap: 8px; margin-top: 1.25rem; justify-content: flex-end; }
-  .btn-cancel { background: none; border: 0.5px solid var(--color-border-secondary); padding: 7px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; color: var(--color-text-secondary); }
-  .btn-add { background: var(--color-text-primary); color: var(--color-background-primary); border: none; padding: 7px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; }
-  .confirm-modal p { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.25rem; line-height: 1.5; }
-  .confirm-modal strong { color: var(--color-text-primary); }
-  .btn-delete { background: #E24B4A; color: white; border: none; padding: 7px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; }
-  .store-hint { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.09);
+    --border-mid: rgba(0,0,0,0.15);
+    --text: #1a1917;
+    --muted: #6b6960;
+    --hint: #a09d96;
+    --green: #3b6d11;
+    --green-bg: #eaf3de;
+    --green-border: #c0dd97;
+    --amber: #854f0b;
+    --amber-bg: #faeeda;
+    --amber-bar: #ef9f27;
+    --amber-border: #fac775;
+    --red: #501313;
+    --red-bg: #fcebeb;
+    --red-border: #f7c1c1;
+    --blue-accent: #378add;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111110;
+      --surface: #1c1c1a;
+      --border: rgba(255,255,255,0.08);
+      --border-mid: rgba(255,255,255,0.14);
+      --text: #f0ede8;
+      --muted: #9a9790;
+      --hint: #5c5a56;
+      --green: #c0dd97;
+      --green-bg: #173404;
+      --green-border: #3b6d11;
+      --amber: #fac775;
+      --amber-bg: #412402;
+      --amber-bar: #ef9f27;
+      --amber-border: #854f0b;
+      --red: #f7c1c1;
+      --red-bg: #501313;
+      --red-border: #a32d2d;
+      --blue-accent: #85b7eb;
+    }
+  }
+
+  html, body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: calc(5.5rem + var(--safe-bottom));
+  }
+
+  /* Topbar */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    padding: calc(var(--safe-top) + 1rem) 1.25rem 0.75rem;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .topbar-row { display: flex; align-items: center; justify-content: space-between; }
+  .app-title { font-size: 20px; font-weight: 600; letter-spacing: -0.3px; }
+  .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--surface);
+    border-bottom: 0.5px solid var(--border);
+    padding: 8px 1.25rem;
+  }
+  .tab {
+    flex: 1; text-align: center; font-size: 13px; font-weight: 500;
+    padding: 6px 0; border-radius: var(--radius-sm);
+    cursor: pointer; color: var(--muted);
+    border: none; background: none; transition: all 0.15s;
+  }
+  .tab.active {
+    background: var(--bg); color: var(--text);
+    border: 0.5px solid var(--border-mid);
+  }
+
+  /* Nudge banner */
+  .nudge {
+    margin: 0.75rem 1.25rem 0;
+    background: var(--amber-bg); border: 0.5px solid var(--amber-border);
+    border-radius: var(--radius-sm); padding: 9px 12px;
+    font-size: 13px; color: var(--amber);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .nudge.hidden { display: none; }
+  .nudge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber-bar); flex-shrink: 0; }
+
+  /* Category sections */
+  .content { padding: 0 1.25rem; }
+  .cat-section { margin-top: 1.1rem; }
+  .cat-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .cat-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); white-space: nowrap; }
+  .cat-line { flex: 1; height: 0.5px; background: var(--border); }
+
+  /* Item rows */
+  .item-row {
+    padding: 7px 0 5px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .item-row:last-child { border-bottom: none; }
+  .item-top { display: flex; align-items: center; gap: 8px; }
+  .item-name { flex: 1; font-size: 14px; color: var(--text); line-height: 1.3; }
+
+  .status-toggle { display: flex; gap: 3px; flex-shrink: 0; }
+  .s-btn {
+    font-size: 11px; font-weight: 500; padding: 3px 7px;
+    border-radius: 99px; border: 0.5px solid transparent;
+    cursor: pointer; transition: all 0.12s; white-space: nowrap;
+    background: var(--bg); color: var(--muted); border-color: var(--border-mid);
+  }
+  .s-btn.sel.s-ok  { background: var(--green-bg);  color: var(--green);  border-color: var(--green-border); }
+  .s-btn.sel.s-low { background: var(--amber-bg);  color: var(--amber);  border-color: var(--amber-border); }
+  .s-btn.sel.s-out { background: var(--red-bg);    color: var(--red);    border-color: var(--red-border); }
+
+  .rm-btn {
+    font-size: 16px; color: var(--hint); background: none;
+    border: none; cursor: pointer; padding: 0 2px; line-height: 1;
+    opacity: 0.5; flex-shrink: 0;
+  }
+  .rm-btn:active { opacity: 1; }
+
+  /* Note field — tight */
+  .note-wrap { padding: 2px 0 0; }
+  .note-input {
+    width: 100%; font-size: 12px; font-family: 'DM Sans', sans-serif;
+    color: var(--muted); background: none; border: none;
+    border-bottom: 0.5px solid transparent;
+    padding: 0; outline: none; resize: none;
+    line-height: 1.4; transition: border-color 0.15s;
+    overflow: hidden; display: block;
+    min-height: 18px; height: 18px;
+  }
+  .note-input::placeholder { color: var(--hint); }
+  .note-input:focus {
+    border-bottom-color: var(--blue-accent);
+    color: var(--text);
+  }
+
+  /* Add row */
+  .add-row {
+    display: flex; gap: 8px; margin-top: 1.1rem;
+    padding-bottom: 1rem; flex-wrap: wrap;
+  }
+  .add-row input[type=text] {
+    flex: 1; min-width: 110px; font-size: 14px;
+    padding: 0 10px; height: 36px;
+    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); outline: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .add-row input[type=text]:focus { border-color: var(--blue-accent); }
+  .add-row select {
+    font-size: 12px; padding: 0 8px; height: 36px;
+    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text); outline: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .add-row button {
+    height: 36px; padding: 0 16px;
+    background: var(--text); color: var(--bg);
+    border: none; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .add-row button:active { opacity: 0.8; }
+
+  /* Views */
+  .home-view.hidden { display: none; }
+  .list-view { display: none; }
+  .list-view.active { display: block; }
+
+  /* Order list */
+  .list-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 0.9rem 1.25rem 0.75rem; gap: 8px;
+  }
+  .list-title { font-size: 15px; font-weight: 600; }
+  .list-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .reset-btn {
+    font-size: 12px; color: var(--muted); background: none;
+    border: 0.5px solid var(--border-mid); padding: 5px 10px;
+    border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .reset-btn:active { background: var(--border); }
+
+  .list-content { padding: 0 1.25rem; }
+  .list-cat-section { margin-bottom: 1.1rem; }
+  .list-cat-name {
+    font-size: 11px; font-weight: 500; text-transform: uppercase;
+    letter-spacing: 0.6px; color: var(--muted);
+    margin-bottom: 4px; padding-bottom: 5px;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .list-item { padding: 7px 0 5px; border-bottom: 0.5px solid var(--border); }
+  .list-item:last-child { border-bottom: none; }
+  .list-item-top { display: flex; align-items: center; gap: 10px; }
+  .checkbox {
+    width: 18px; height: 18px; border-radius: 5px;
+    border: 1.5px solid var(--border-mid);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s;
+  }
+  .checkbox.checked { background: #639922; border-color: #639922; }
+  .checkbox.checked::after {
+    content: ''; display: block; width: 5px; height: 9px;
+    border: 2px solid white; border-top: none; border-left: none;
+    transform: rotate(40deg) translate(-1px,-1px);
+  }
+  .list-item-name { font-size: 14px; flex: 1; }
+  .list-item-name.checked { text-decoration: line-through; color: var(--muted); }
+  .urgency { font-size: 11px; padding: 2px 7px; border-radius: 99px; font-weight: 500; flex-shrink: 0; }
+  .urg-out { background: var(--red-bg); color: var(--red); }
+  .urg-low { background: var(--amber-bg); color: var(--amber); }
+  .list-item-note { font-size: 12px; color: var(--muted); margin-top: 2px; padding-left: 28px; font-style: italic; }
+
+  .empty-list { text-align: center; padding: 3rem 1.25rem; color: var(--muted); font-size: 14px; }
+
+  /* FAB */
+  .fab-area {
+    position: fixed;
+    bottom: calc(1rem + var(--safe-bottom));
+    left: 50%; transform: translateX(-50%);
+    width: calc(100% - 2.5rem); max-width: 430px;
+    display: flex; gap: 8px;
+  }
+  .fab {
+    flex: 1; height: 48px; border-radius: var(--radius);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  }
+  .fab-remind { background: var(--surface); color: var(--text); border: 0.5px solid var(--border-mid); }
+  .fab-add    { background: var(--text); color: var(--bg); }
+  .fab:active { opacity: 0.8; }
+
+  /* Reminder sheet */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 50; animation: fadeIn 0.2s ease;
+  }
+  .overlay.hidden { display: none; }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .sheet {
+    background: var(--surface);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 1.25rem 1.25rem calc(1.5rem + var(--safe-bottom));
+    width: 100%; max-width: 480px;
+    animation: slideUp 0.22s ease;
+  }
+  @keyframes slideUp { from { transform:translateY(16px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  .sheet-handle { width: 36px; height: 4px; background: var(--border-mid); border-radius: 99px; margin: 0 auto 1.1rem; }
+  .sheet-title { font-size: 16px; font-weight: 600; margin-bottom: 0.9rem; }
+  .reminder-store { margin-bottom: 0.9rem; }
+  .reminder-store-name { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 4px; }
+  .reminder-items { font-size: 14px; color: var(--text); line-height: 1.6; }
+  .reminder-note  { font-size: 12px; color: var(--muted); font-style: italic; }
+  .sheet-close {
+    width: 100%; height: 44px; background: var(--text); color: var(--bg);
+    border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500;
+    cursor: pointer; margin-top: 1.1rem; font-family: 'DM Sans', sans-serif;
+  }
+  .all-good { text-align: center; padding: 1rem 0; font-size: 14px; color: var(--muted); }
 </style>
+</head>
+<body>
+<div class="app">
 
-<div class="tracker">
-  <div class="header">
-    <div class="header-left">
-      <h2>Office supplies</h2>
-      <p>Organised by store · click notes to edit</p>
-    </div>
-  </div>
-
-  <div class="simulate-row">
-    <span class="sim-label">Simulate use:</span>
-    <button class="sim-btn" onclick="simulateDay()">Use items (1 day)</button>
-    <button class="sim-btn" onclick="simulateWeek()">Use items (1 week)</button>
-    <button class="sim-btn" onclick="triggerReminder()">Leaving work reminder</button>
-  </div>
-
-  <div id="alertBanner" class="alert-banner hidden">
-    <div class="alert-icon">!</div>
-    <div class="alert-text" id="alertText"></div>
-    <button class="dismiss-btn" onclick="document.getElementById('alertBanner').classList.add('hidden')">×</button>
-  </div>
-
-  <div id="reminderBanner" class="reminder-banner hidden">
-    <div class="reminder-text" id="reminderText"></div>
-    <button class="dismiss-btn" onclick="document.getElementById('reminderBanner').classList.add('hidden')">×</button>
-  </div>
-
-  <div id="storeGroups"></div>
-
-  <div class="section-footer">
-    <div class="summary" id="summary"></div>
-    <button class="add-item-btn" onclick="openModal()">+ Add item</button>
-  </div>
-</div>
-
-<div id="modalOverlay" class="modal-overlay hidden">
-  <div class="modal">
-    <h3>Add item</h3>
-    <div class="field"><label>Item name</label><input type="text" id="newName" placeholder="e.g. Sticky notes" /></div>
-    <div class="field"><label>Current quantity</label><input type="number" id="newQty" min="1" max="100" value="20" /></div>
-    <div class="field"><label>Max quantity</label><input type="number" id="newMax" min="5" max="200" value="40" /></div>
-    <div class="field"><label>Restock threshold</label><input type="number" id="newThresh" min="1" max="50" value="10" /></div>
-    <div class="field">
-      <label>Store</label>
-      <div class="store-select-wrap">
-        <select id="newStore"></select>
-        <div class="store-hint">Don't see your store? Add it below.</div>
-        <div class="add-store-row">
-          <input type="text" id="newStoreName" placeholder="New store name…" />
-          <button class="add-store-btn" onclick="addStore()">Add</button>
-        </div>
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="app-title">Office supplies</div>
+        <div class="topbar-sub" id="subLine">Loading…</div>
       </div>
     </div>
-    <div class="field"><label>Notes (model numbers, links, etc.)</label><textarea id="newNotes" rows="3" placeholder="e.g. HP 67XL · https://officeworks.com.au/..."></textarea></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-add" onclick="addItem()">Add item</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabHome" onclick="switchTab('home')">Stock levels</button>
+    <button class="tab" id="tabList" onclick="switchTab('list')">Order list</button>
+  </div>
+
+  <!-- Home view -->
+  <div class="home-view" id="homeView">
+    <div id="nudge" class="nudge hidden">
+      <div class="nudge-dot"></div>
+      <span id="nudgeText"></span>
+    </div>
+    <div class="content">
+      <div id="catContainer"></div>
+      <div class="add-row">
+        <input id="newName" type="text" placeholder="Add item…" onkeydown="if(event.key==='Enter')addItem()" />
+        <select id="newCat">
+          <option value="Paper & printing">Paper & printing</option>
+          <option value="Writing">Writing</option>
+          <option value="Desk">Desk</option>
+          <option value="Tech">Tech</option>
+          <option value="Kitchen">Kitchen</option>
+          <option value="Cleaning">Cleaning</option>
+          <option value="Other">Other</option>
+        </select>
+        <button onclick="addItem()">Add</button>
+      </div>
     </div>
   </div>
+
+  <!-- List view -->
+  <div class="list-view" id="listView">
+    <div class="list-header">
+      <div>
+        <div class="list-title">Order list</div>
+        <div class="list-sub" id="listSub"></div>
+      </div>
+      <button class="reset-btn" onclick="resetChecked()">Clear ticked</button>
+    </div>
+    <div class="list-content" id="listContainer"></div>
+  </div>
+
 </div>
 
-<div id="confirmOverlay" class="modal-overlay hidden">
-  <div class="modal confirm-modal">
-    <h3>Delete item?</h3>
-    <p>Remove <strong id="confirmName"></strong> from your inventory? This can't be undone.</p>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
-      <button class="btn-delete" onclick="confirmDelete()">Delete</button>
-    </div>
+<!-- FABs -->
+<div class="fab-area">
+  <button class="fab fab-remind" onclick="openReminder()">🔔 Leaving work?</button>
+  <button class="fab fab-add"    onclick="focusAdd()">+ Add item</button>
+</div>
+
+<!-- Reminder overlay -->
+<div class="overlay hidden" id="overlay" onclick="handleOvClick(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">On your way home</div>
+    <div id="reminderBody"></div>
+    <button class="sheet-close" onclick="closeReminder()">Got it</button>
   </div>
 </div>
 
 <script>
-const STORE_COLORS = ['#378ADD','#1D9E75','#EF9F27','#D4537E','#7F77DD','#D85A30','#639922','#BA7517'];
-let stores = ['Officeworks', 'Coles', 'Chemist Warehouse'];
+const CATS = ['Paper & printing','Writing','Desk','Tech','Kitchen','Cleaning','Other'];
+const STORE_KEY = 'office_supplies_notes_v1';
+
 let items = [
-  { id:1, name:"Printer paper",      qty:38, max:50, threshold:10, store:"Officeworks",       notes:"A4 80gsm · Refill Code: PP-A4-500" },
-  { id:2, name:"Blue pens",          qty:14, max:30, threshold:8,  store:"Officeworks",       notes:"Bic Cristal Medium · Pack of 10" },
-  { id:3, name:"Sticky notes",       qty:6,  max:20, threshold:7,  store:"Officeworks",       notes:"76x76mm yellow · https://www.officeworks.com.au" },
-  { id:4, name:"Whiteboard markers", qty:9,  max:12, threshold:3,  store:"Officeworks",       notes:"Artline 577 — black, blue, red" },
-  { id:5, name:"Staples",            qty:40, max:50, threshold:10, store:"Officeworks",       notes:"Standard 26/6 · fits most desktop staplers" },
-  { id:6, name:"Toner cartridge",    qty:2,  max:4,  threshold:1,  store:"Officeworks",       notes:"HP 508A Black · Model: CF360A" },
-  { id:7, name:"Coffee pods",        qty:24, max:60, threshold:15, store:"Coles",             notes:"Nespresso Vertuo — Blonde Roast" },
-  { id:8, name:"Hand sanitiser",     qty:3,  max:8,  threshold:3,  store:"Chemist Warehouse", notes:"500ml pump bottle" },
+  {id:1,  name:'Printer paper',       cat:'Paper & printing', status:'low', note:'A4 80gsm, buy 2 reams',  checked:false},
+  {id:2,  name:'Ink cartridges',      cat:'Paper & printing', status:'ok',  note:'HP 305 black + colour',  checked:false},
+  {id:3,  name:'Blue pens',           cat:'Writing',          status:'low', note:'Bic ballpoint x20 pack', checked:false},
+  {id:4,  name:'Whiteboard markers',  cat:'Writing',          status:'ok',  note:'Black + red + blue',     checked:false},
+  {id:5,  name:'Sticky notes',        cat:'Desk',             status:'out', note:'76x76mm yellow',         checked:false},
+  {id:6,  name:'Staples',             cat:'Desk',             status:'ok',  note:'',                       checked:false},
+  {id:7,  name:'Binder clips',        cat:'Desk',             status:'out', note:'Assorted sizes',         checked:false},
+  {id:8,  name:'Scissors',            cat:'Desk',             status:'ok',  note:'',                       checked:false},
+  {id:9,  name:'USB-A hub',           cat:'Tech',             status:'low', note:'4-port at least',        checked:false},
+  {id:10, name:'AA batteries',        cat:'Tech',             status:'ok',  note:'Duracell preferred',     checked:false},
+  {id:11, name:'Coffee pods',         cat:'Kitchen',          status:'low', note:'Nespresso original x50', checked:false},
+  {id:12, name:'Milk',                cat:'Kitchen',          status:'out', note:'Full cream 2L',          checked:false},
+  {id:13, name:'Hand soap',           cat:'Cleaning',         status:'ok',  note:'',                       checked:false},
+  {id:14, name:'Hand sanitiser',      cat:'Cleaning',         status:'low', note:'500ml pump bottle',      checked:false},
 ];
-let nextId = 9;
-let editingNoteId = null;
-let pendingDeleteId = null;
+let nextId = 20;
+let currentTab = 'home';
 
-function storeColor(store) {
-  const idx = stores.indexOf(store);
-  return STORE_COLORS[idx % STORE_COLORS.length] || '#888';
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) { const p = JSON.parse(raw); items = p.items || items; nextId = p.nextId || nextId; }
+  } catch {}
+}
+function save() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({items, nextId})); } catch {}
 }
 
-function getStatus(item) {
-  if (item.qty <= item.threshold * 0.5) return 'critical';
-  if (item.qty <= item.threshold) return 'low';
-  return 'ok';
+function setStatus(id, s) {
+  const item = items.find(i=>i.id===id);
+  if (item) { item.status = s; save(); render(); }
 }
-
-function linkify(text) {
-  return text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+function updateNote(id, val) {
+  const item = items.find(i=>i.id===id);
+  if (item) { item.note = val; save(); }
 }
-
-function renderCard(item) {
-  const pct = Math.round((item.qty / item.max) * 100);
-  const status = getStatus(item);
-  const statusLabel = status === 'ok' ? 'OK' : status === 'low' ? 'Low' : 'Critical';
-  const isEditing = editingNoteId === item.id;
-  const notesHtml = isEditing
-    ? `<textarea class="notes-input" id="notesInput_${item.id}" rows="3">${item.notes || ''}</textarea>
-       <div class="notes-actions">
-         <button class="notes-cancel" onclick="cancelNote()">Cancel</button>
-         <button class="notes-save" onclick="saveNote(${item.id})">Save</button>
-       </div>`
-    : item.notes
-      ? `<div class="notes-display" onclick="editNote(${item.id})" title="Click to edit">${linkify(item.notes)}</div>`
-      : `<div class="notes-display empty" onclick="editNote(${item.id})">Add notes…</div>`;
-
-  return `<div class="item-card ${status}" id="card_${item.id}">
-    <div class="card-top">
-      <div class="card-info"><div class="item-name">${item.name}</div></div>
-      <div class="card-top-right">
-        <span class="status-pill status-${status}">${statusLabel}</span>
-        <button class="icon-btn delete" onclick="askDelete(${item.id})" title="Delete">✕</button>
-      </div>
-    </div>
-    <div class="bar-wrap"><div class="bar bar-${status}" style="width:${pct}%"></div></div>
-    <div class="card-bottom">
-      <div class="count-display"><span>${item.qty}</span> / ${item.max} units</div>
-      <div class="controls">
-        <button class="ctrl-btn" onclick="use(${item.id})">−</button>
-        <button class="ctrl-btn" onclick="restock(${item.id})">+</button>
-      </div>
-    </div>
-    <div class="notes-area">${notesHtml}</div>
-  </div>`;
+function removeItem(id) {
+  items = items.filter(i=>i.id!==id); save(); render();
 }
-
-function render() {
-  const container = document.getElementById('storeGroups');
-  const activeStores = stores.filter(s => items.some(i => i.store === s));
-  
-  container.innerHTML = activeStores.map(store => {
-    const storeItems = items.filter(i => i.store === store);
-    const lowCount = storeItems.filter(i => getStatus(i) !== 'ok').length;
-    const color = storeColor(store);
-    const badge = lowCount > 0 ? `<span class="store-alert-badge">${lowCount} need restock</span>` : '';
-    return `<div class="store-section">
-      <div class="store-header">
-        <div class="store-header-left">
-          <div class="store-dot" style="background:${color}"></div>
-          <span class="store-name">${store}</span>
-          <span class="store-count">${storeItems.length} item${storeItems.length !== 1 ? 's' : ''}</span>
-          ${badge}
-        </div>
-      </div>
-      <div class="grid">${storeItems.map(renderCard).join('')}</div>
-    </div>`;
-  }).join('');
-
-  const low = items.filter(i => getStatus(i) !== 'ok');
-  document.getElementById('summary').innerHTML = `<strong>${items.length}</strong> items across <strong>${activeStores.length}</strong> stores · <strong>${low.length}</strong> need attention`;
-
-  if (low.length > 0) {
-    document.getElementById('alertText').innerHTML = `<strong>Restock needed:</strong> ${low.map(i => i.name).join(', ')}`;
-    document.getElementById('alertBanner').classList.remove('hidden');
-  } else {
-    document.getElementById('alertBanner').classList.add('hidden');
-  }
-
-  refreshStoreSelect();
-}
-
-function refreshStoreSelect() {
-  const sel = document.getElementById('newStore');
-  if (!sel) return;
-  const current = sel.value;
-  sel.innerHTML = stores.map(s => `<option value="${s}"${s===current?' selected':''}>${s}</option>`).join('');
-}
-
-function addStore() {
-  const input = document.getElementById('newStoreName');
-  const name = input.value.trim();
-  if (!name || stores.includes(name)) { input.value = ''; return; }
-  stores.push(name);
-  input.value = '';
-  refreshStoreSelect();
-  document.getElementById('newStore').value = name;
-}
-
-function use(id) {
-  const item = items.find(i => i.id === id);
-  if (item && item.qty > 0) { item.qty--; render(); }
-}
-
-function restock(id) {
-  const item = items.find(i => i.id === id);
-  if (item) { item.qty = item.max; render(); }
-}
-
-function editNote(id) {
-  editingNoteId = id;
-  render();
-  const el = document.getElementById('notesInput_' + id);
-  if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
-}
-
-function saveNote(id) {
-  const el = document.getElementById('notesInput_' + id);
-  const item = items.find(i => i.id === id);
-  if (item && el) item.notes = el.value.trim();
-  editingNoteId = null;
-  render();
-}
-
-function cancelNote() { editingNoteId = null; render(); }
-
-function askDelete(id) {
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  pendingDeleteId = id;
-  document.getElementById('confirmName').textContent = item.name;
-  document.getElementById('confirmOverlay').classList.remove('hidden');
-}
-
-function closeConfirm() {
-  pendingDeleteId = null;
-  document.getElementById('confirmOverlay').classList.add('hidden');
-}
-
-function confirmDelete() {
-  if (pendingDeleteId !== null) items = items.filter(i => i.id !== pendingDeleteId);
-  pendingDeleteId = null;
-  document.getElementById('confirmOverlay').classList.add('hidden');
-  render();
-}
-
-function simulateDay() {
-  items.forEach(item => { item.qty = Math.max(0, item.qty - Math.floor(Math.random() * 3) - 1); });
-  render();
-}
-
-function simulateWeek() {
-  items.forEach(item => { item.qty = Math.max(0, item.qty - Math.floor(Math.random() * 12) - 5); });
-  render();
-}
-
-function triggerReminder() {
-  const low = items.filter(i => getStatus(i) !== 'ok');
-  const el = document.getElementById('reminderBanner');
-  if (low.length === 0) {
-    document.getElementById('reminderText').innerHTML = "All good! Everything is well stocked. Safe travels home.";
-  } else {
-    const byStore = {};
-    low.forEach(item => { if (!byStore[item.store]) byStore[item.store] = []; byStore[item.store].push(item.name); });
-    const storeList = Object.entries(byStore).map(([s,n]) => `<strong>${s}</strong>: ${n.join(', ')}`).join(' · ');
-    document.getElementById('reminderText').innerHTML = `Heading home? Don't forget to swing by — ${storeList}`;
-  }
-  el.classList.remove('hidden');
-}
-
-function openModal() {
-  refreshStoreSelect();
-  document.getElementById('modalOverlay').classList.remove('hidden');
-}
-
-function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); }
-
 function addItem() {
   const name = document.getElementById('newName').value.trim();
   if (!name) return;
-  items.push({
-    id: nextId++, name,
-    qty: parseInt(document.getElementById('newQty').value) || 20,
-    max: parseInt(document.getElementById('newMax').value) || 40,
-    threshold: parseInt(document.getElementById('newThresh').value) || 10,
-    store: document.getElementById('newStore').value,
-    notes: document.getElementById('newNotes').value.trim(),
-  });
+  const cat = document.getElementById('newCat').value;
+  items.push({id:nextId++, name, cat, status:'ok', note:'', checked:false});
   document.getElementById('newName').value = '';
-  document.getElementById('newNotes').value = '';
-  closeModal();
-  render();
+  save(); render();
+}
+function focusAdd() {
+  if (currentTab !== 'home') switchTab('home');
+  setTimeout(()=>document.getElementById('newName').focus(), 80);
+}
+function toggleCheck(id) {
+  const item = items.find(i=>i.id===id);
+  if (item) { item.checked = !item.checked; save(); renderList(); }
+}
+function resetChecked() {
+  items.forEach(i=>i.checked=false); save(); renderList();
 }
 
-document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === document.getElementById('modalOverlay')) closeModal(); });
-document.getElementById('confirmOverlay').addEventListener('click', e => { if (e.target === document.getElementById('confirmOverlay')) closeConfirm(); });
-document.getElementById('newStoreName').addEventListener('keydown', e => { if (e.key === 'Enter') addStore(); });
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabHome').classList.toggle('active', tab==='home');
+  document.getElementById('tabList').classList.toggle('active', tab==='list');
+  document.getElementById('homeView').classList.toggle('hidden', tab!=='home');
+  document.getElementById('listView').classList.toggle('active', tab==='list');
+  if (tab==='list') renderList(); else renderHome();
+}
 
+function renderHome() {
+  const low = items.filter(i=>i.status==='low'||i.status==='out');
+  const nudge = document.getElementById('nudge');
+  if (low.length > 0) {
+    document.getElementById('nudgeText').textContent = `${low.length} item${low.length>1?'s':''} running low or out — check the order list`;
+    nudge.classList.remove('hidden');
+  } else { nudge.classList.add('hidden'); }
+
+  const byCat = {};
+  CATS.forEach(c=>byCat[c]=[]);
+  items.forEach(i=>{ if(byCat[i.cat]) byCat[i.cat].push(i); });
+
+  document.getElementById('catContainer').innerHTML = CATS.filter(c=>byCat[c].length>0).map(cat=>`
+    <div class="cat-section">
+      <div class="cat-header">
+        <span class="cat-label">${cat}</span>
+        <div class="cat-line"></div>
+      </div>
+      ${byCat[cat].map(item=>`
+        <div class="item-row">
+          <div class="item-top">
+            <div class="item-name">${esc(item.name)}</div>
+            <div class="status-toggle">
+              <button class="s-btn s-ok${item.status==='ok'?' sel':''}"  onclick="setStatus(${item.id},'ok')">Good</button>
+              <button class="s-btn s-low${item.status==='low'?' sel':''}" onclick="setStatus(${item.id},'low')">Low</button>
+              <button class="s-btn s-out${item.status==='out'?' sel':''}" onclick="setStatus(${item.id},'out')">Out</button>
+            </div>
+            <button class="rm-btn" onclick="removeItem(${item.id})" title="Remove">×</button>
+          </div>
+          <div class="note-wrap">
+            <textarea class="note-input" rows="1"
+              placeholder="Note: brand, size, where to buy…"
+              oninput="updateNote(${item.id},this.value);autoResize(this)"
+              onfocus="autoResize(this)"
+            >${esc(item.note)}</textarea>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+
+  const subLine = items.length + ' items · ' + (low.length > 0 ? low.length + ' need attention' : 'all stocked');
+  document.getElementById('subLine').textContent = subLine;
+}
+
+function renderList() {
+  const need = items.filter(i=>i.status==='low'||i.status==='out');
+  const container = document.getElementById('listContainer');
+  if (need.length === 0) {
+    container.innerHTML = '<div class="empty-list">Nothing to order — all stocked up 🎉</div>';
+    document.getElementById('listSub').textContent = '';
+    return;
+  }
+  const ticked = need.filter(i=>i.checked).length;
+  document.getElementById('listSub').textContent = `${need.length - ticked} to order · ${ticked} done`;
+
+  const sorted = [...need].sort((a,b)=>{
+    if (a.checked !== b.checked) return a.checked ? 1 : -1;
+    if (a.status !== b.status) return a.status==='out' ? -1 : 1;
+    return a.cat.localeCompare(b.cat);
+  });
+
+  const byCat = {};
+  sorted.forEach(i=>{ (byCat[i.cat]=byCat[i.cat]||[]).push(i); });
+
+  container.innerHTML = Object.entries(byCat).map(([cat,citems])=>`
+    <div class="list-cat-section">
+      <div class="list-cat-name">${cat}</div>
+      ${citems.map(item=>`
+        <div class="list-item">
+          <div class="list-item-top">
+            <div class="checkbox${item.checked?' checked':''}" onclick="toggleCheck(${item.id})"></div>
+            <span class="list-item-name${item.checked?' checked':''}"> ${esc(item.name)}</span>
+            <span class="urgency ${item.status==='out'?'urg-out':'urg-low'}">${item.status==='out'?'Out':'Low'}</span>
+          </div>
+          ${item.note ? `<div class="list-item-note">${esc(item.note)}</div>` : ''}
+        </div>`).join('')}
+    </div>`).join('');
+
+  const low = items.filter(i=>i.status==='low'||i.status==='out');
+  const subLine = items.length + ' items · ' + (low.length > 0 ? low.length + ' need attention' : 'all stocked');
+  document.getElementById('subLine').textContent = subLine;
+}
+
+function render() {
+  if (currentTab === 'home') renderHome(); else renderList();
+}
+
+function openReminder() {
+  const need = items.filter(i=>i.status==='low'||i.status==='out');
+  const body = document.getElementById('reminderBody');
+  if (need.length === 0) {
+    body.innerHTML = '<div class="all-good">Everything is stocked up — enjoy the commute! 🎉</div>';
+  } else {
+    const byStore = {'Officeworks':[], 'Coles':[], 'Other':[]};
+    need.forEach(i => {
+      const note = i.note.toLowerCase();
+      if (note.includes('coles')||note.includes('woolworths')||note.includes('aldi')||i.cat==='Kitchen') byStore['Coles'].push(i);
+      else byStore['Officeworks'].push(i);
+    });
+    let html = '';
+    Object.entries(byStore).forEach(([store, sitems]) => {
+      if (sitems.length === 0) return;
+      html += `<div class="reminder-store">
+        <div class="reminder-store-name">${store}</div>
+        ${sitems.map(i=>`
+          <div style="padding:4px 0; border-bottom:0.5px solid var(--border);">
+            <div class="reminder-items">${esc(i.name)} <span style="font-size:11px;padding:1px 6px;border-radius:99px;margin-left:4px;${i.status==='out'?'background:var(--red-bg);color:var(--red)':'background:var(--amber-bg);color:var(--amber)'}">${i.status==='out'?'Out':'Low'}</span></div>
+            ${i.note?`<div class="reminder-note">${esc(i.note)}</div>`:''}
+          </div>`).join('')}
+      </div>`;
+    });
+    body.innerHTML = html;
+  }
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function closeReminder() { document.getElementById('overlay').classList.add('hidden'); }
+function handleOvClick(e) { if (e.target===document.getElementById('overlay')) closeReminder(); }
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+load();
 render();
+
+// resize all textareas after render
+setTimeout(()=>{
+  document.querySelectorAll('.note-input').forEach(el => {
+    if (el.value) autoResize(el);
+  });
+}, 50);
 </script>
+</body>
+</html>
