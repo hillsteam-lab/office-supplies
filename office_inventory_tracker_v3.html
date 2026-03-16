@@ -1,0 +1,385 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .tracker { padding: 1.5rem 0; font-family: var(--font-sans); }
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 12px; }
+  .header-left h2 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+  .header-left p { font-size: 13px; color: var(--color-text-secondary); margin-top: 2px; }
+  .simulate-row { display: flex; align-items: center; gap: 8px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .sim-btn { font-size: 12px; border: 0.5px solid var(--color-border-secondary); background: none; padding: 5px 10px; border-radius: var(--border-radius-md); cursor: pointer; color: var(--color-text-secondary); }
+  .sim-btn:hover { background: var(--color-background-secondary); }
+  .sim-label { font-size: 12px; color: var(--color-text-secondary); }
+  .alert-banner { background: #FAEEDA; border: 0.5px solid #FAC775; border-radius: var(--border-radius-md); padding: 10px 14px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
+  .alert-banner.hidden { display: none; }
+  .alert-icon { width: 18px; height: 18px; background: #EF9F27; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 11px; font-weight: 500; color: white; }
+  .alert-text { font-size: 13px; color: #633806; flex: 1; }
+  .alert-text strong { font-weight: 500; }
+  .dismiss-btn { font-size: 14px; color: var(--color-text-secondary); cursor: pointer; border: none; background: none; padding: 2px 6px; border-radius: 4px; line-height: 1; }
+  .dismiss-btn:hover { background: var(--color-background-secondary); }
+  .reminder-banner { background: #E6F1FB; border: 0.5px solid #B5D4F4; border-radius: var(--border-radius-md); padding: 10px 14px; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 10px; }
+  .reminder-banner.hidden { display: none; }
+  .reminder-text { font-size: 13px; color: #042C53; flex: 1; }
+  .reminder-text strong { font-weight: 500; }
+  .store-section { margin-bottom: 1.75rem; }
+  .store-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .store-header-left { display: flex; align-items: center; gap: 10px; }
+  .store-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .store-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .store-count { font-size: 12px; color: var(--color-text-secondary); }
+  .store-alert-badge { font-size: 11px; font-weight: 500; background: #FAEEDA; color: #633806; padding: 2px 8px; border-radius: 99px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .item-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; transition: border-color 0.2s; }
+  .item-card.low { border-color: #FAC775; }
+  .item-card.critical { border-color: #F7C1C1; }
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 8px; }
+  .card-info { flex: 1; min-width: 0; }
+  .item-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .card-top-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .status-pill { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 99px; }
+  .status-ok { background: #EAF3DE; color: #27500A; }
+  .status-low { background: #FAEEDA; color: #633806; }
+  .status-critical { background: #FCEBEB; color: #501313; }
+  .icon-btn { width: 24px; height: 24px; border-radius: 5px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--color-text-secondary); font-size: 13px; transition: background 0.15s; }
+  .icon-btn:hover { background: var(--color-background-secondary); }
+  .icon-btn.delete:hover { background: #FCEBEB; color: #A32D2D; }
+  .bar-wrap { height: 6px; background: var(--color-background-secondary); border-radius: 99px; margin-bottom: 10px; overflow: hidden; }
+  .bar { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+  .bar-ok { background: #639922; }
+  .bar-low { background: #EF9F27; }
+  .bar-critical { background: #E24B4A; }
+  .card-bottom { display: flex; align-items: center; justify-content: space-between; }
+  .count-display { font-size: 13px; color: var(--color-text-secondary); }
+  .count-display span { font-weight: 500; color: var(--color-text-primary); }
+  .controls { display: flex; align-items: center; gap: 6px; }
+  .ctrl-btn { width: 26px; height: 26px; border-radius: 6px; border: 0.5px solid var(--color-border-secondary); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; color: var(--color-text-primary); transition: background 0.15s; }
+  .ctrl-btn:hover { background: var(--color-background-secondary); }
+  .ctrl-btn:active { transform: scale(0.95); }
+  .notes-area { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--color-border-tertiary); }
+  .notes-display { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; cursor: pointer; min-height: 18px; word-break: break-word; }
+  .notes-display a { color: var(--color-text-info); text-decoration: none; }
+  .notes-display a:hover { text-decoration: underline; }
+  .notes-display.empty { color: var(--color-text-tertiary); font-style: italic; }
+  .notes-display.empty:hover { color: var(--color-text-secondary); }
+  .notes-input { width: 100%; font-size: 12px; resize: none; border: 0.5px solid var(--color-border-secondary); border-radius: 6px; padding: 6px 8px; font-family: var(--font-sans); color: var(--color-text-primary); background: var(--color-background-secondary); line-height: 1.5; }
+  .notes-input:focus { outline: none; border-color: var(--color-border-primary); }
+  .notes-actions { display: flex; gap: 6px; margin-top: 6px; justify-content: flex-end; }
+  .notes-save { font-size: 12px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; padding: 4px 10px; border-radius: 5px; cursor: pointer; }
+  .notes-cancel { font-size: 12px; background: none; border: 0.5px solid var(--color-border-secondary); padding: 4px 10px; border-radius: 5px; cursor: pointer; color: var(--color-text-secondary); }
+  .section-footer { margin-top: 0.5rem; padding-top: 1rem; border-top: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .add-item-btn { font-size: 13px; color: var(--color-text-info); background: none; border: 0.5px solid var(--color-border-info); padding: 6px 14px; border-radius: var(--border-radius-md); cursor: pointer; }
+  .add-item-btn:hover { background: var(--color-background-info); }
+  .summary { font-size: 13px; color: var(--color-text-secondary); }
+  .summary strong { color: var(--color-text-primary); font-weight: 500; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: var(--color-background-primary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; width: 340px; max-width: 92vw; max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; color: var(--color-text-primary); }
+  .field { margin-bottom: 12px; }
+  .field label { font-size: 12px; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
+  .field input, .field select { width: 100%; font-size: 14px; }
+  .field textarea { width: 100%; font-size: 13px; font-family: var(--font-sans); resize: vertical; border: 0.5px solid var(--color-border-secondary); border-radius: 6px; padding: 6px 8px; background: var(--color-background-secondary); color: var(--color-text-primary); line-height: 1.5; }
+  .field textarea:focus { outline: none; border-color: var(--color-border-primary); }
+  .store-select-wrap { position: relative; }
+  .add-store-row { display: flex; gap: 6px; margin-top: 6px; }
+  .add-store-row input { flex: 1; font-size: 13px; }
+  .add-store-btn { font-size: 12px; background: var(--color-text-primary); color: var(--color-background-primary); border: none; padding: 0 12px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 1.25rem; justify-content: flex-end; }
+  .btn-cancel { background: none; border: 0.5px solid var(--color-border-secondary); padding: 7px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; color: var(--color-text-secondary); }
+  .btn-add { background: var(--color-text-primary); color: var(--color-background-primary); border: none; padding: 7px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; }
+  .confirm-modal p { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.25rem; line-height: 1.5; }
+  .confirm-modal strong { color: var(--color-text-primary); }
+  .btn-delete { background: #E24B4A; color: white; border: none; padding: 7px 14px; border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; }
+  .store-hint { font-size: 11px; color: var(--color-text-tertiary); margin-top: 4px; }
+</style>
+
+<div class="tracker">
+  <div class="header">
+    <div class="header-left">
+      <h2>Office supplies</h2>
+      <p>Organised by store · click notes to edit</p>
+    </div>
+  </div>
+
+  <div class="simulate-row">
+    <span class="sim-label">Simulate use:</span>
+    <button class="sim-btn" onclick="simulateDay()">Use items (1 day)</button>
+    <button class="sim-btn" onclick="simulateWeek()">Use items (1 week)</button>
+    <button class="sim-btn" onclick="triggerReminder()">Leaving work reminder</button>
+  </div>
+
+  <div id="alertBanner" class="alert-banner hidden">
+    <div class="alert-icon">!</div>
+    <div class="alert-text" id="alertText"></div>
+    <button class="dismiss-btn" onclick="document.getElementById('alertBanner').classList.add('hidden')">×</button>
+  </div>
+
+  <div id="reminderBanner" class="reminder-banner hidden">
+    <div class="reminder-text" id="reminderText"></div>
+    <button class="dismiss-btn" onclick="document.getElementById('reminderBanner').classList.add('hidden')">×</button>
+  </div>
+
+  <div id="storeGroups"></div>
+
+  <div class="section-footer">
+    <div class="summary" id="summary"></div>
+    <button class="add-item-btn" onclick="openModal()">+ Add item</button>
+  </div>
+</div>
+
+<div id="modalOverlay" class="modal-overlay hidden">
+  <div class="modal">
+    <h3>Add item</h3>
+    <div class="field"><label>Item name</label><input type="text" id="newName" placeholder="e.g. Sticky notes" /></div>
+    <div class="field"><label>Current quantity</label><input type="number" id="newQty" min="1" max="100" value="20" /></div>
+    <div class="field"><label>Max quantity</label><input type="number" id="newMax" min="5" max="200" value="40" /></div>
+    <div class="field"><label>Restock threshold</label><input type="number" id="newThresh" min="1" max="50" value="10" /></div>
+    <div class="field">
+      <label>Store</label>
+      <div class="store-select-wrap">
+        <select id="newStore"></select>
+        <div class="store-hint">Don't see your store? Add it below.</div>
+        <div class="add-store-row">
+          <input type="text" id="newStoreName" placeholder="New store name…" />
+          <button class="add-store-btn" onclick="addStore()">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Notes (model numbers, links, etc.)</label><textarea id="newNotes" rows="3" placeholder="e.g. HP 67XL · https://officeworks.com.au/..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-add" onclick="addItem()">Add item</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmOverlay" class="modal-overlay hidden">
+  <div class="modal confirm-modal">
+    <h3>Delete item?</h3>
+    <p>Remove <strong id="confirmName"></strong> from your inventory? This can't be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-delete" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORE_COLORS = ['#378ADD','#1D9E75','#EF9F27','#D4537E','#7F77DD','#D85A30','#639922','#BA7517'];
+let stores = ['Officeworks', 'Coles', 'Chemist Warehouse'];
+let items = [
+  { id:1, name:"Printer paper",      qty:38, max:50, threshold:10, store:"Officeworks",       notes:"A4 80gsm · Refill Code: PP-A4-500" },
+  { id:2, name:"Blue pens",          qty:14, max:30, threshold:8,  store:"Officeworks",       notes:"Bic Cristal Medium · Pack of 10" },
+  { id:3, name:"Sticky notes",       qty:6,  max:20, threshold:7,  store:"Officeworks",       notes:"76x76mm yellow · https://www.officeworks.com.au" },
+  { id:4, name:"Whiteboard markers", qty:9,  max:12, threshold:3,  store:"Officeworks",       notes:"Artline 577 — black, blue, red" },
+  { id:5, name:"Staples",            qty:40, max:50, threshold:10, store:"Officeworks",       notes:"Standard 26/6 · fits most desktop staplers" },
+  { id:6, name:"Toner cartridge",    qty:2,  max:4,  threshold:1,  store:"Officeworks",       notes:"HP 508A Black · Model: CF360A" },
+  { id:7, name:"Coffee pods",        qty:24, max:60, threshold:15, store:"Coles",             notes:"Nespresso Vertuo — Blonde Roast" },
+  { id:8, name:"Hand sanitiser",     qty:3,  max:8,  threshold:3,  store:"Chemist Warehouse", notes:"500ml pump bottle" },
+];
+let nextId = 9;
+let editingNoteId = null;
+let pendingDeleteId = null;
+
+function storeColor(store) {
+  const idx = stores.indexOf(store);
+  return STORE_COLORS[idx % STORE_COLORS.length] || '#888';
+}
+
+function getStatus(item) {
+  if (item.qty <= item.threshold * 0.5) return 'critical';
+  if (item.qty <= item.threshold) return 'low';
+  return 'ok';
+}
+
+function linkify(text) {
+  return text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+}
+
+function renderCard(item) {
+  const pct = Math.round((item.qty / item.max) * 100);
+  const status = getStatus(item);
+  const statusLabel = status === 'ok' ? 'OK' : status === 'low' ? 'Low' : 'Critical';
+  const isEditing = editingNoteId === item.id;
+  const notesHtml = isEditing
+    ? `<textarea class="notes-input" id="notesInput_${item.id}" rows="3">${item.notes || ''}</textarea>
+       <div class="notes-actions">
+         <button class="notes-cancel" onclick="cancelNote()">Cancel</button>
+         <button class="notes-save" onclick="saveNote(${item.id})">Save</button>
+       </div>`
+    : item.notes
+      ? `<div class="notes-display" onclick="editNote(${item.id})" title="Click to edit">${linkify(item.notes)}</div>`
+      : `<div class="notes-display empty" onclick="editNote(${item.id})">Add notes…</div>`;
+
+  return `<div class="item-card ${status}" id="card_${item.id}">
+    <div class="card-top">
+      <div class="card-info"><div class="item-name">${item.name}</div></div>
+      <div class="card-top-right">
+        <span class="status-pill status-${status}">${statusLabel}</span>
+        <button class="icon-btn delete" onclick="askDelete(${item.id})" title="Delete">✕</button>
+      </div>
+    </div>
+    <div class="bar-wrap"><div class="bar bar-${status}" style="width:${pct}%"></div></div>
+    <div class="card-bottom">
+      <div class="count-display"><span>${item.qty}</span> / ${item.max} units</div>
+      <div class="controls">
+        <button class="ctrl-btn" onclick="use(${item.id})">−</button>
+        <button class="ctrl-btn" onclick="restock(${item.id})">+</button>
+      </div>
+    </div>
+    <div class="notes-area">${notesHtml}</div>
+  </div>`;
+}
+
+function render() {
+  const container = document.getElementById('storeGroups');
+  const activeStores = stores.filter(s => items.some(i => i.store === s));
+  
+  container.innerHTML = activeStores.map(store => {
+    const storeItems = items.filter(i => i.store === store);
+    const lowCount = storeItems.filter(i => getStatus(i) !== 'ok').length;
+    const color = storeColor(store);
+    const badge = lowCount > 0 ? `<span class="store-alert-badge">${lowCount} need restock</span>` : '';
+    return `<div class="store-section">
+      <div class="store-header">
+        <div class="store-header-left">
+          <div class="store-dot" style="background:${color}"></div>
+          <span class="store-name">${store}</span>
+          <span class="store-count">${storeItems.length} item${storeItems.length !== 1 ? 's' : ''}</span>
+          ${badge}
+        </div>
+      </div>
+      <div class="grid">${storeItems.map(renderCard).join('')}</div>
+    </div>`;
+  }).join('');
+
+  const low = items.filter(i => getStatus(i) !== 'ok');
+  document.getElementById('summary').innerHTML = `<strong>${items.length}</strong> items across <strong>${activeStores.length}</strong> stores · <strong>${low.length}</strong> need attention`;
+
+  if (low.length > 0) {
+    document.getElementById('alertText').innerHTML = `<strong>Restock needed:</strong> ${low.map(i => i.name).join(', ')}`;
+    document.getElementById('alertBanner').classList.remove('hidden');
+  } else {
+    document.getElementById('alertBanner').classList.add('hidden');
+  }
+
+  refreshStoreSelect();
+}
+
+function refreshStoreSelect() {
+  const sel = document.getElementById('newStore');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = stores.map(s => `<option value="${s}"${s===current?' selected':''}>${s}</option>`).join('');
+}
+
+function addStore() {
+  const input = document.getElementById('newStoreName');
+  const name = input.value.trim();
+  if (!name || stores.includes(name)) { input.value = ''; return; }
+  stores.push(name);
+  input.value = '';
+  refreshStoreSelect();
+  document.getElementById('newStore').value = name;
+}
+
+function use(id) {
+  const item = items.find(i => i.id === id);
+  if (item && item.qty > 0) { item.qty--; render(); }
+}
+
+function restock(id) {
+  const item = items.find(i => i.id === id);
+  if (item) { item.qty = item.max; render(); }
+}
+
+function editNote(id) {
+  editingNoteId = id;
+  render();
+  const el = document.getElementById('notesInput_' + id);
+  if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+}
+
+function saveNote(id) {
+  const el = document.getElementById('notesInput_' + id);
+  const item = items.find(i => i.id === id);
+  if (item && el) item.notes = el.value.trim();
+  editingNoteId = null;
+  render();
+}
+
+function cancelNote() { editingNoteId = null; render(); }
+
+function askDelete(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  pendingDeleteId = id;
+  document.getElementById('confirmName').textContent = item.name;
+  document.getElementById('confirmOverlay').classList.remove('hidden');
+}
+
+function closeConfirm() {
+  pendingDeleteId = null;
+  document.getElementById('confirmOverlay').classList.add('hidden');
+}
+
+function confirmDelete() {
+  if (pendingDeleteId !== null) items = items.filter(i => i.id !== pendingDeleteId);
+  pendingDeleteId = null;
+  document.getElementById('confirmOverlay').classList.add('hidden');
+  render();
+}
+
+function simulateDay() {
+  items.forEach(item => { item.qty = Math.max(0, item.qty - Math.floor(Math.random() * 3) - 1); });
+  render();
+}
+
+function simulateWeek() {
+  items.forEach(item => { item.qty = Math.max(0, item.qty - Math.floor(Math.random() * 12) - 5); });
+  render();
+}
+
+function triggerReminder() {
+  const low = items.filter(i => getStatus(i) !== 'ok');
+  const el = document.getElementById('reminderBanner');
+  if (low.length === 0) {
+    document.getElementById('reminderText').innerHTML = "All good! Everything is well stocked. Safe travels home.";
+  } else {
+    const byStore = {};
+    low.forEach(item => { if (!byStore[item.store]) byStore[item.store] = []; byStore[item.store].push(item.name); });
+    const storeList = Object.entries(byStore).map(([s,n]) => `<strong>${s}</strong>: ${n.join(', ')}`).join(' · ');
+    document.getElementById('reminderText').innerHTML = `Heading home? Don't forget to swing by — ${storeList}`;
+  }
+  el.classList.remove('hidden');
+}
+
+function openModal() {
+  refreshStoreSelect();
+  document.getElementById('modalOverlay').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); }
+
+function addItem() {
+  const name = document.getElementById('newName').value.trim();
+  if (!name) return;
+  items.push({
+    id: nextId++, name,
+    qty: parseInt(document.getElementById('newQty').value) || 20,
+    max: parseInt(document.getElementById('newMax').value) || 40,
+    threshold: parseInt(document.getElementById('newThresh').value) || 10,
+    store: document.getElementById('newStore').value,
+    notes: document.getElementById('newNotes').value.trim(),
+  });
+  document.getElementById('newName').value = '';
+  document.getElementById('newNotes').value = '';
+  closeModal();
+  render();
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === document.getElementById('modalOverlay')) closeModal(); });
+document.getElementById('confirmOverlay').addEventListener('click', e => { if (e.target === document.getElementById('confirmOverlay')) closeConfirm(); });
+document.getElementById('newStoreName').addEventListener('keydown', e => { if (e.key === 'Enter') addStore(); });
+
+render();
+</script>
